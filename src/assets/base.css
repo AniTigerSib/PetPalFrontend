@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+/* semantic color variables for this project */
+:root {
+  --color-background: #141414;
+  --color-background-dark: #0F0F0F;
+  --color-secondary: #9747FF;
+  --color-secondary-muted: rgba(151, 71, 255, 0.7);
+  --color-mute: #545454;
+  --color-btn-read: #00AF46;
+
+  --color-border: #262626;
+  --color-border-hover: #717171;
+
+  --color-heading: #FFFFFF;
+  --color-text: #FFFFFF;
+  --color-text-unfocused: var(--color-mute);
+  --color-text-focused: var(--color-border-hover);
+  --color-text-read: var(--color-btn-read);
+  --color-text-secondary: #999999;
+  --color-text-warning: rgba(255, 0, 0, 0.84);
+
+  --transparency-primary: rgba(0, 0, 0, 0.5);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  line-height: 150%;
+  /*font-weight: normal;*/
+}
+
+body {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  color: var(--color-text);
+  background: var(--color-background);
+  /*transition:*/
+  /*  color 0.5s,*/
+  /*  background-color 0.5s;*/
+  /*line-height: 1.6;*/
+  font-family:
+          'Manrope',
+          serif;
+  font-size: 18px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
