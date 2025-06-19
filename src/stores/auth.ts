@@ -1,17 +1,19 @@
 import {ref, watch} from "vue";
 import { defineStore } from "pinia";
-import {loginApi, logoutApi, registerApi} from "@/api/user.ts";
-import type {LoginFormDto, RegisterFormDto, TkPairDto} from "@/types/auth.ts";
-// import {loginApi, logoutApi, registerApi} from "@/api/user.ts";
+import {loginApi, logoutApi, registerApi} from "@/api/auth.ts";
+import type {ILoginFormDto, IRegisterFormDto} from "@/types/auth.ts";
+import StorageService from "@/stores/storage-service.ts";
+// import {loginApi, logoutApi, registerApi} from "@/api/auth.ts";
 
 export const useAuthStore = defineStore('auth', () => {
-    const accessToken = ref(localStorage.getItem('access')?.toString());
-    const refreshToken = ref(localStorage.getItem('refresh')?.toString());
-    const loginForm = ref<LoginFormDto>({
+    const accessTokenRef = ref(StorageService.getItem<string>('access'));
+    const refreshTokenRef = ref(StorageService.getItem<string>('refresh'));
+    const uid = ref(StorageService.getItem<number>('uid'));
+    const loginForm = ref<ILoginFormDto>({
         login: '',
         password: '',
     });
-    const registrationForm = ref<RegisterFormDto>({
+    const registrationForm = ref<IRegisterFormDto>({
         username: '',
         password: '',
         email: '',
@@ -22,7 +24,8 @@ export const useAuthStore = defineStore('auth', () => {
     const isRegisterIncorrect = ref<boolean>(false);
     const authError = ref('');
     const isLoading = ref(false);
-    const isLoggedIn = ref(!!accessToken.value);
+    const isLoggedIn = ref(!!accessTokenRef.value);
+    // const basicUserInfo = ref<IThisBasicUser | null>(StorageService.getItem<IThisBasicUser>('user'));
 
     const resetLoginForm = () => {
         loginForm.value = {
@@ -42,15 +45,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     const loginFormCorrect = () => {
-        return loginForm.value.login.trim().length > 0 &&
-               loginForm.value.password.trim().length > 0;
+        return loginForm.value.login.trim() &&
+               loginForm.value.password.trim();
     }
 
     const registerFormCorrect = () => {
-        return registrationForm.value.email.trim().length > 0 &&
-               registrationForm.value.password.trim().length > 0 &&
-               registrationForm.value.username.trim().length > 0 &&
-               registrationForm.value.firstName.trim().length > 0;
+        return registrationForm.value.email.trim() &&
+               registrationForm.value.password.trim() &&
+               registrationForm.value.username.trim() &&
+               registrationForm.value.firstName.trim();
     }
 
     // Функция сброса ошибок
@@ -61,9 +64,11 @@ export const useAuthStore = defineStore('auth', () => {
     };
 
     // Отслеживаем изменения username и password
-    watch([loginForm.value?.login, loginForm.value?.password], () => {
-        resetErrors();
-    });
+    watch([loginForm, registrationForm], () => {
+        if (authError.value) {
+            resetErrors();
+        }
+    }, { deep: true });
 
     const register = async () => {
         if (!registerFormCorrect()) {
@@ -93,11 +98,13 @@ export const useAuthStore = defineStore('auth', () => {
         }
         try {
             isLoading.value = true;
-            const tokenPair: TkPairDto = await loginApi(loginForm.value);
-            accessToken.value = tokenPair.accessToken;
-            refreshToken.value = tokenPair.refreshToken;
-            localStorage.setItem('access', tokenPair.accessToken);
-            localStorage.setItem('refresh', tokenPair.refreshToken);
+            const {user, ...tokenPair} = await loginApi(loginForm.value);
+            console.log(tokenPair);
+            accessTokenRef.value = tokenPair.accessToken;
+            refreshTokenRef.value = tokenPair.refreshToken;
+            StorageService.setItem<number>('uid', user.id);
+            StorageService.setItem<string>('access', tokenPair.accessToken);
+            StorageService.setItem<string>('refresh', tokenPair.refreshToken);
             resetLoginForm();
             isLoggedIn.value = true;
         } catch (e: any) {
@@ -122,19 +129,22 @@ export const useAuthStore = defineStore('auth', () => {
             }
         }
         isLoading.value = false;
-        accessToken.value = undefined;
-        refreshToken.value = undefined;
-        localStorage.removeItem('access');
-        localStorage.removeItem('refresh');
+        uid.value = null;
+        accessTokenRef.value = null;
+        refreshTokenRef.value = null;
+        StorageService.clear();
         isLoggedIn.value = false;
     }
 
     return {
-        accessToken,
-        refreshToken,
+        accessToken: accessTokenRef,
+        refreshToken: refreshTokenRef,
         authError,
         loginForm,
         registrationForm,
+        resetErrors,
+        resetLoginForm,
+        resetRegisterForm,
         loading: isLoading,
         isLoggedIn,
         isLoginIncorrect,

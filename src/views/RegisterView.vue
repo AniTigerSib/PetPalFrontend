@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {useAuthStore} from "@/stores/auth.ts";
 import "@/assets/auth-shared.scss"
-import {useRouter} from "vue-router";
+import {onBeforeRouteLeave, useRouter} from "vue-router";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -17,6 +17,12 @@ const register = async () => {
     await authStore.logout(false);
   }
 }
+
+onBeforeRouteLeave((to, from, next) => {
+  authStore.resetRegisterForm();
+  authStore.resetErrors();
+  next();
+})
 </script>
 
 <template>
@@ -49,7 +55,7 @@ const register = async () => {
             Произошла ошибка, попробуйте еще раз.
           </small>
           <small v-if="authStore.authError && authStore.isLoginIncorrect">
-            Найден пользователь с таким логином.
+            {{ authStore.authError }}
           </small>
         </div>
         <button

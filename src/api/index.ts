@@ -1,8 +1,8 @@
 import axios, {type AxiosResponse, type InternalAxiosRequestConfig} from 'axios';
 import {useAuthStore} from "@/stores/auth.ts";
-import {refreshApi} from "@/api/user.ts";
+import {refreshApi} from "@/api/auth.ts";
 import router from "@/router";
-import type {TkPairDto} from "@/types/auth.ts";
+import StorageService from "@/stores/storage-service.ts";
 
 const $host = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -13,7 +13,13 @@ const $authHost = axios.create({
 })
 
 const authInterceptor = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    config.headers.authorization = `Bearer ${localStorage.getItem('access')}`;
+    // config.headers.authorization = `Bearer ${StorageService.getItem<string>('access')}`;
+    const token = StorageService.getItem<string>('access');
+
+    if (token && token !== 'null' && token !== 'undefined') {
+        config.headers.authorization = `Bearer ` + token;
+    }
+
     return config;
 };
 
@@ -30,7 +36,7 @@ $authHost.interceptors.response.use((response: AxiosResponse) => {
         originalRequest._retry = true;
 
         try {
-            const newTokenPair: TkPairDto = await refreshApi(refreshToken);
+            const newTokenPair = await refreshApi(refreshToken);
             console.log(`New token pair:\nAccess: ${newTokenPair.accessToken}
                          \nRefresh: ${newTokenPair.refreshToken}`);
             authStore.accessToken = newTokenPair.accessToken;
@@ -40,7 +46,7 @@ $authHost.interceptors.response.use((response: AxiosResponse) => {
         } catch (e) {
             console.log(e);
             await authStore.logout(false);
-            // await router.push('/login');
+            await router.push('/login');
         }
     } else if (error.response?.status === 404) {
         await router.push({name: 'NotFound'});

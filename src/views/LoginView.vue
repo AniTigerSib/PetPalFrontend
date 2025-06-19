@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {RouterLink, useRouter} from "vue-router";
+import {onBeforeRouteLeave, RouterLink, useRouter} from "vue-router";
 import {useAuthStore} from "@/stores/auth.ts";
 import "@/assets/auth-shared.scss"
 
@@ -8,6 +8,7 @@ const router = useRouter();
 
 const login = async () => {
   await authStore.login();
+  console.log("ASASFASGGAGASGASGASGASGASGASGAGSGSGSAGAS");
 
   if (!authStore.authError) {
     await router.push("/");
@@ -17,6 +18,12 @@ const login = async () => {
     await authStore.logout(false);
   }
 }
+
+onBeforeRouteLeave((to, from, next) => {
+  authStore.resetLoginForm();
+  authStore.resetErrors();
+  next();
+})
 </script>
 
 <template>
@@ -37,7 +44,7 @@ const login = async () => {
             Произошла ошибка, попробуйте еще раз.
           </small>
           <small v-if="authStore.authError && authStore.isLoginIncorrect">
-            Неверный логин или пароль.
+            {{ authStore.authError }}
           </small>
         </div>
         <button

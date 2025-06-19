@@ -2,9 +2,9 @@
 // import SearchBar from "@/components/SearchBar.vue";
 import {useAuthStore} from "@/stores/auth.ts";
 // import IconList from "@/components/icons/IconList.vue";
-// import IconLogout from "@/components/icons/IconLogout.vue";
-// import IconUser from "@/components/icons/IconUser.vue";
 import {useRouter} from "vue-router";
+import IconLogout from "@/components/icons/IconLogout.vue";
+import IconUser from "@/components/icons/IconUser.vue";
 
 const router = useRouter()
 
@@ -25,8 +25,8 @@ const logout = async () => {
 <!--      <SearchBar v-if="authStore.isLoggedIn" />-->
       <div class="header__menu">
 <!--        <IconList v-if="authStore.isLoggedIn" v-on:click="router.push('/favourites');" />-->
-<!--        <IconLogout v-if="authStore.isLoggedIn" v-on:click="logout();"/>-->
-<!--        <IconUser v-else v-on:click="router.push('/login');"/>-->
+        <IconLogout v-if="authStore.isLoggedIn" v-on:click="logout();"/>
+        <IconUser v-else v-on:click="router.push('/login');"/>
       </div>
     </div>
   </header>
