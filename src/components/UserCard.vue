@@ -1,9 +1,12 @@
 <script setup lang="ts">
 
+import {useUserStore} from "@/stores/user.ts";
+
+const userStore = useUserStore();
 </script>
 
 <template>
-  <div class="user-card">
+  <div class="user-card" v-on:click="userStore.openUserProfile(user.id)">
     <div class="user-card__image-container">
       <img
           v-if="user.profileImage"

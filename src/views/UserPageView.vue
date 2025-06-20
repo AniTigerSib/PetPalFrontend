@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { useAuthStore } from '@/stores/auth.ts';
-import { useUserStore } from '@/stores/user.ts';
+import {computed, onMounted, ref} from 'vue';
+import {useRoute} from 'vue-router';
+import {useAuthStore} from '@/stores/auth.ts';
+import {useUserStore} from '@/stores/user.ts';
 import StorageService from '@/stores/storage-service.ts';
 import router from "@/router";
+import {addFriend, deleteFriendApi, respondFriendRequestApi} from "@/api/user.ts";
+import {FriendRequestStatus} from "@/types/friends.ts";
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -17,7 +19,29 @@ const isOwnProfile = computed(() => {
   return currentUserId.value === userStore.userInfo.id;
 });
 
+const makeFriendRequest = async () => {
+  await addFriend({receiverId: userId});
+  await userStore.loadUserProfile(userId);
+}
+
+const responseFriendRequest = async (isPositive: boolean) => {
+  if (userStore.userInfo.friendReqId) {
+    if (isPositive) {
+      await respondFriendRequestApi({requestId: userStore.userInfo.friendReqId, status: FriendRequestStatus.ACCEPTED})
+    } else {
+      await respondFriendRequestApi({requestId: userStore.userInfo.friendReqId, status: FriendRequestStatus.REJECTED})
+    }
+  }
+  await userStore.loadUserProfile(userId);
+}
+
+const deleteFriend = async () => {
+  await deleteFriendApi(userStore.userInfo.id);
+  await userStore.loadUserProfile(userId);
+}
+
 onMounted(async () => {
+  console.log(userId);
   if (!authStore.isLoggedIn) {
     await authStore.logout(false);
     await router.push('/login');
@@ -90,6 +114,48 @@ onMounted(async () => {
                 Отмена
               </button>
             </div>
+          </div>
+          <div class="user-actions" v-else>
+            <button
+                v-if="userStore.userInfo.friendStatus == ''"
+                @click="makeFriendRequest()"
+                class="edit-button"
+            >
+              Добавить в друзья
+            </button>
+            <button
+                v-if="userStore.userInfo.friendStatus == 'pendingRequest'"
+                @click="responseFriendRequest(true)"
+                class="edit-button"
+            >
+              Принять запрос
+            </button>
+            <button
+                v-if="userStore.userInfo.friendStatus == 'pendingRequest'"
+                @click="responseFriendRequest(false)"
+                class="edit-button"
+            >
+              Отклонить запрос
+            </button>
+            <button
+                v-else-if="userStore.userInfo.friendStatus == 'accepted' || userStore.userInfo.friendStatus == 'acceptedRequest'"
+                @click="deleteFriend()"
+                class="edit-button"
+            >
+              Удалить из друзей
+            </button>
+            <span
+                v-else-if="userStore.userInfo.friendStatus == 'pending'"
+                class="friend-status"
+            >
+              Запрос отправлен
+            </span>
+            <span
+                v-else-if="userStore.userInfo.friendStatus == 'rejected' || userStore.userInfo.friendStatus == 'rejectedRequest'"
+                class="friend-status"
+            >
+              Запрос дружбы отклонен
+            </span>
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import {useAuthStore} from "@/stores/auth.ts";
 import {useRouter} from "vue-router";
 import IconLogout from "@/components/icons/IconLogout.vue";
 import IconUser from "@/components/icons/IconUser.vue";
+import SearchBar from "@/components/SearchBar.vue";
 
 const router = useRouter()
 
@@ -22,7 +23,7 @@ const logout = async () => {
       <div class="header__logo">
         <p><RouterLink to="/">PetPal</RouterLink></p>
       </div>
-<!--      <SearchBar v-if="authStore.isLoggedIn" />-->
+      <SearchBar v-if="authStore.isLoggedIn" />
       <div class="header__menu">
         <IconUser v-if="authStore.isLoggedIn" v-on:click="router.push(`/user/${authStore.uid}`);" />
         <IconLogout v-if="authStore.isLoggedIn" v-on:click="logout();"/>

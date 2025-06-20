@@ -26,4 +26,6 @@ export interface IUpdatableUserProfile {
 export interface IUserProfile extends IBasicUser {
     username: string;
     bio: string;
+    friendStatus: string;
+    friendReqId: number | null;
 }
