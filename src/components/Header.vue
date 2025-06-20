@@ -24,7 +24,7 @@ const logout = async () => {
       </div>
 <!--      <SearchBar v-if="authStore.isLoggedIn" />-->
       <div class="header__menu">
-<!--        <IconList v-if="authStore.isLoggedIn" v-on:click="router.push('/favourites');" />-->
+        <IconUser v-if="authStore.isLoggedIn" v-on:click="router.push(`/user/${authStore.uid}`);" />
         <IconLogout v-if="authStore.isLoggedIn" v-on:click="logout();"/>
         <IconUser v-else v-on:click="router.push('/login');"/>
       </div>

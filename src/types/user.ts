@@ -15,6 +15,14 @@ export interface IFriendUser extends IBasicUser {
     friendSince: Date;
 }
 
+export interface IUpdatableUserProfile {
+    id: number;
+    username: string;
+    bio: string;
+    firstName: string;
+    lastName: string;
+}
+
 export interface IUserProfile extends IBasicUser {
     username: string;
     bio: string;

@@ -8,10 +8,10 @@ const router = useRouter();
 
 const login = async () => {
   await authStore.login();
-  console.log("ASASFASGGAGASGASGASGASGASGASGAGSGSGSAGAS");
+  // console.log("ASASFASGGAGASGASGASGASGASGASGAGSGSGSAGAS");
 
   if (!authStore.authError) {
-    await router.push("/");
+    await router.push(`/user/${authStore.uid}`);
     console.log(`No errors found`);
   } else {
     console.log(`Error found: ${authStore.authError}`);

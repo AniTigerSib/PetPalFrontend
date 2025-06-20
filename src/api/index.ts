@@ -17,20 +17,26 @@ const authInterceptor = (config: InternalAxiosRequestConfig): InternalAxiosReque
     const token = StorageService.getItem<string>('access');
 
     if (token && token !== 'null' && token !== 'undefined') {
-        config.headers.authorization = `Bearer ` + token;
+        config.headers.Authorization = 'Bearer ' + token;
     }
+    console.error(config.headers.Authorization);
 
     return config;
 };
 
 $authHost.interceptors.request.use(authInterceptor)
 
+$authHost.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+    console.error(config);
+    return config;
+})
+
 $authHost.interceptors.response.use((response: AxiosResponse) => {
     return response;
 }, async function (error) {
     const authStore = useAuthStore();
     const originalRequest = error.config;
-    const refreshToken = localStorage.getItem('refresh');
+    const refreshToken = StorageService.getItem<string>('refresh');
 
     if (error.response?.status === 401 && !originalRequest._retry && refreshToken !== null) {
         originalRequest._retry = true;
@@ -41,8 +47,8 @@ $authHost.interceptors.response.use((response: AxiosResponse) => {
                          \nRefresh: ${newTokenPair.refreshToken}`);
             authStore.accessToken = newTokenPair.accessToken;
             authStore.refreshToken = newTokenPair.refreshToken;
-            localStorage.setItem('access', newTokenPair.accessToken);
-            localStorage.setItem('refresh', newTokenPair.refreshToken);
+            StorageService.setItem<string>('access', newTokenPair.accessToken);
+            StorageService.setItem<string>('refresh', newTokenPair.refreshToken);
         } catch (e) {
             console.log(e);
             await authStore.logout(false);

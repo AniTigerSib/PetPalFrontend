@@ -20,10 +20,20 @@ const router = createRouter({
       component: () => import(/* webpackChunkName: "register" */ '../views/RegisterView.vue')
     },
     {
+      path: '/user/:id',
+      name: 'userPage',
+      component: () => import(/* webpackChunkName: "userPage" */ '../views/UserPageView.vue')
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: () => import(/* webpackChunkName: "notFound" */ '../views/NotFoundPageView.vue')
-    }
+    },
+    {
+      path: '/search',
+      name: 'searchPage',
+      component: () => import(/* webpackChunkName: "userPage" */ '../views/SearchPageView.vue')
+    },
   ],
 })
 

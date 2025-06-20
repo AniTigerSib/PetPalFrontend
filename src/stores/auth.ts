@@ -100,6 +100,7 @@ export const useAuthStore = defineStore('auth', () => {
             isLoading.value = true;
             const {user, ...tokenPair} = await loginApi(loginForm.value);
             console.log(tokenPair);
+            uid.value = user.id;
             accessTokenRef.value = tokenPair.accessToken;
             refreshTokenRef.value = tokenPair.refreshToken;
             StorageService.setItem<number>('uid', user.id);
@@ -151,5 +152,6 @@ export const useAuthStore = defineStore('auth', () => {
         register,
         login,
         logout,
+        uid,
     }
 })

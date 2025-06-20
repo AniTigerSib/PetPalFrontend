@@ -1,19 +1,35 @@
 import {defineStore} from "pinia";
-import type {IUserProfile} from "@/types/user.ts";
+import type {IUpdatableUserProfile, IUserProfile} from "@/types/user.ts";
 import {ref} from "vue";
-import {getProfile} from "@/api/user.ts";
+import {getProfile, updateProfile} from "@/api/user.ts";
 
-export const useAuthStore = defineStore('user', () => {
+export const useUserStore = defineStore('user', () => {
     const userInfo = ref<IUserProfile>({
         id: 0,
-        bio: "", firstName: "", lastName: "", profileImage: "", username: "",
+        bio: "", firstName: "", lastName: "", username: "", profileImage: "",
+    })
+    const editableUserInfo = ref<IUpdatableUserProfile>({
+        id: 0,
+        bio: "", firstName: "", lastName: "", username: "",
     })
     const isLoading = ref(false);
+    const isEditing = ref(false);
+    const isSaving = ref(false);
+
+    const startEditing = () => {
+        isEditing.value = true;
+        editableUserInfo.value = { ...userInfo.value };
+    };
+
+    const cancelEditing = () => {
+        isEditing.value = false;
+        editableUserInfo.value = { ...userInfo.value };
+    };
 
     const clearUserInfo = () => {
         userInfo.value = {
             id: 0,
-            bio: "", firstName: "", lastName: "", profileImage: "", username: "",
+            bio: "", firstName: "", lastName: "", username: "", profileImage: "",
         }
     }
 
@@ -22,10 +38,40 @@ export const useAuthStore = defineStore('user', () => {
             isLoading.value = true;
             userInfo.value = await getProfile(id);
         } catch (e: any) {
-            console.error(e);
+            console.error('Error loading user profile:', e);
             clearUserInfo();
         } finally {
             isLoading.value = false;
         }
+    }
+
+    const saveUserProfile = async () => {
+        try {
+            isSaving.value = true;
+            userInfo.value = await updateProfile(userInfo.value.id, {
+                firstName: editableUserInfo.value.firstName,
+                lastName: editableUserInfo.value.lastName,
+                bio: editableUserInfo.value.bio,
+                username: editableUserInfo.value.username,
+            });
+            isEditing.value = false;
+        } catch (error) {
+            console.error('Error saving user profile:', error);
+        } finally {
+            isEditing.value = false;
+        }
+    }
+
+    return {
+        userInfo,
+        editableUserInfo,
+        isLoading,
+        isEditing,
+        isSaving,
+        startEditing,
+        cancelEditing,
+        saveUserProfile,
+        clearUserInfo,
+        loadUserProfile,
     }
 });
