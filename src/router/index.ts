@@ -34,6 +34,11 @@ const router = createRouter({
       name: 'searchPage',
       component: () => import(/* webpackChunkName: "userPage" */ '../views/SearchPageView.vue')
     },
+    {
+      path: '/friends',
+      name: 'Friends',
+      component: () => import(/* webpackChunkName: "userPage" */ '../views/FriendsPage.vue')
+    },
   ],
 })
 
